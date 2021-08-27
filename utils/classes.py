@@ -36,7 +36,7 @@ class KurisuBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         for logger in [
-            "kurisu",
+            "akio",
             "discord.client",
             "discord.gateway",
             "discord.http",
@@ -45,10 +45,10 @@ class KurisuBot(commands.AutoShardedBot):
             "main",
         ]:
             logging.getLogger(logger).setLevel(
-                logging.DEBUG if logger == "kurisu" else logging.INFO
+                logging.DEBUG if logger == "akio" else logging.INFO
             )
             logging.getLogger(logger).addHandler(LoggingHandler())
-        self.logger = logging.getLogger("kurisu")
+        self.logger = logging.getLogger("akio")
         super().__init__(
             help_command=None,
             intents=discord.Intents.all(),
@@ -63,7 +63,7 @@ class KurisuBot(commands.AutoShardedBot):
         self._session = None
         self.startup_time = datetime.now()
         self.version = "2.1.1"
-        self.db = Database("sqlite:///kurisu.db")
+        self.db = Database("sqlite:///akio.db")
         self.executed_commands = 0
         self.prefixes = {}
 
@@ -83,7 +83,7 @@ class KurisuBot(commands.AutoShardedBot):
             await self.db.connect()
         except AssertionError:
             pass
-        self.logger.info("Connected to the database: `kurisu.db`")
+        self.logger.info("Connected to the database: `akio.db`")
 
     async def on_ready(self):
         if self.uptime is not None:

@@ -47,5 +47,5 @@ async def DatabaseInit(Schema: str):
 
 
 asyncio.run(DatabaseInit(schema))
-bot.logger.info("Running Kurisu Now!")
+bot.logger.info("Running Akio Now!")
 bot.run(TOKEN)

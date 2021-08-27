@@ -129,7 +129,7 @@ class Miscellaneous(commands.Cog):
         )
         embed2 = discord.Embed(
             title=f"{self.bot.user.name} Stats",
-            description="Find My Source [Here](https://github.com/Yat-o/Kurisu/tree/rewrite)",
+            description="Find My Source [Here](https://github.com/Yat-o/AkioOrg/tree/rewrite)",
             color=self.bot.ok_color,
         )
         embed2.set_author(icon_url=self.bot.user.avatar.url, name="Statistics")
