@@ -50,4 +50,6 @@ class Custom(commands.Cog):
     async def boost(self, ctx: commands.Context):
         """Yet another custom"""
         await ctx.send("https://media1.tenor.com/images/68b7eca6ad0720a64a7e14d6bca83942/tenor.gif?itemid=11979611")
-        
+
+def setup(bot):
+    bot.add_cog(Custom(bot))
