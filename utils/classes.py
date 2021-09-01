@@ -8,7 +8,7 @@ from databases import Database
 from discord.ext import commands, menus
 import discord
 
-import config
+import configoptions
 
 from .log import LoggingHandler
 
@@ -56,14 +56,14 @@ class KurisuBot(commands.AutoShardedBot):
             *args,
             **kwargs,
         )
-        self.owner_ids = config.OWNER_IDS
-        self.ok_color = int(str(f"0x{config.OK_COLOR}").replace("#", ""), base=16)
-        self.error_color = int(str(f"0x{config.ERROR_COLOR}").replace("#", ""), base=16)
+        self.owner_ids = configoptions.OWNER_IDS
+        self.ok_color = int(str(f"0x{configoptions.OK_COLOR}").replace("#", ""), base=16)
+        self.error_color = int(str(f"0x{configoptions.ERROR_COLOR}").replace("#", ""), base=16)
         self.uptime = None
         self._session = None
         self.startup_time = datetime.now()
-        self.version = "2.1.1"
         self.db = Database("sqlite:///akio.db")
+        self.version = "2.2.1"
         self.executed_commands = 0
         self.prefixes = {}
 
