@@ -20,7 +20,9 @@ class Tasks(commands.Cog):
         await asyncio.sleep(60)
         await self.bot.change_presence(activity=discord.Game("with you :D"))
         await asyncio.sleep(60)
-        await self.bot.change_presence(activity=discord.Game("with Tylerr#6979!"))
+        await self.bot.change_presence(activity=discord.Game("with Tylerr"))
+        await asyncio.sleep(60)
+        await self.bot.change_presence(activity=discord.Game("with Jay"))
         await asyncio.sleep(60)
         await self.bot.change_presence(
             activity=discord.Activity(
