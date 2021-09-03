@@ -50,5 +50,5 @@ if not bot.get_config("configoptions", "options", "no_priviledged_owners"):
         bot.owner_ids.add(o)
 
 asyncio.run(DatabaseInit(schema))
-bot.logger.info("Running Kurisu Now!")
+bot.logger.info("Running Akio Now!")
 bot.run(bot.get_config("config", "config", "token"))
