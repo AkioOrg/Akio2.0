@@ -109,7 +109,7 @@ class Miscellaneous(commands.Cog):
             color=self.bot.ok_color,
         )
         embed.set_author(icon_url=self.bot.user.avatar.url, name="General")
-        embed.add_field(name="Author(s)", value="\n".join(map(str, bot_owners)))
+        embed.add_field(name="Author(s)", value="\n".join(map(str, owners)))
         embed.add_field(
             name="Mention & ID", value=f"{self.bot.user.mention}\n`{self.bot.user.id}`"
         )
