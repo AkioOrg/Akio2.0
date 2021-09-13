@@ -94,12 +94,11 @@ class Miscellaneous(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def stats(self, ctx: commands.Context):
         """Some stats about me."""
+        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
         text_channels = 0
         voice_channels = 0
-        bot_owners = []
-        process = psutil.Process(os.getpid())
-        for o in self.bot.owner_ids:
-            bot_owners.append(await self.bot.fetch_user(o))
+        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
+
         for chan in self.bot.get_all_channels():
             if isinstance(chan, discord.TextChannel):
                 text_channels += 1
