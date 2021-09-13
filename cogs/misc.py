@@ -94,12 +94,11 @@ class Miscellaneous(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def stats(self, ctx: commands.Context):
         """Some stats about me."""
+        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
         text_channels = 0
         voice_channels = 0
-        bot_owners = []
-        process = psutil.Process(os.getpid())
-        for o in self.bot.owner_ids:
-            bot_owners.append(await self.bot.fetch_user(o))
+        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
+
         for chan in self.bot.get_all_channels():
             if isinstance(chan, discord.TextChannel):
                 text_channels += 1
@@ -110,7 +109,7 @@ class Miscellaneous(commands.Cog):
             color=self.bot.ok_color,
         )
         embed.set_author(icon_url=self.bot.user.avatar.url, name="General")
-        embed.add_field(name="Author(s)", value="\n".join(map(str, bot_owners)))
+        embed.add_field(name="Author(s)", value="\n".join(map(str, owners)))
         embed.add_field(
             name="Mention & ID", value=f"{self.bot.user.mention}\n`{self.bot.user.id}`"
         )
@@ -121,7 +120,7 @@ class Miscellaneous(commands.Cog):
         )
         embed.add_field(
             name="Support Server & Invite Link",
-            value=f"Click [Here](https://discord.com/api/oauth2/authorize?client_id={APPLICATION_ID}&scope=bot) To Invite Me and Click [Here](https://discord.gg/Cs5RdJF9pb) To Join My Support Server",
+            value=f"Click [Here](https://discord.com/api/oauth2/authorize?client_id={self.bot.get_config('config', 'config', 'application_id')}&scope=bot) To Invite Me and Click [Here](https://discord.gg/Cs5RdJF9pb) To Join My Support Server",
         )
         embed.set_footer(
             icon_url=self.bot.user.avatar.url, text=f"{self.bot.user.name} was made with love <3"

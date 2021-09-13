@@ -59,7 +59,7 @@ class BotOwner(commands.Cog):
 
     @commands.command()
     async def elevate(self, ctx: commands.Context, user: discord.User = None):
-        """Elevate a user or yourself to ownership privliedge"""
+        """Elevate a user or yourself to ownership privilege"""
         if not ctx.author.id in self.bot.get_config("config", "config", "owner_ids"):
             return await ctx.send(
                 embed=discord.Embed(
@@ -72,7 +72,7 @@ class BotOwner(commands.Cog):
         if user.id in self.bot.owner_ids:
             return await ctx.send(
                 embed=discord.Embed(
-                    description=f"{user} is already in the ownership privliedge set",
+                    description=f"{user} is already in the ownership privilege set",
                     color=self.bot.error_color,
                 )
             )
@@ -82,7 +82,7 @@ class BotOwner(commands.Cog):
                 description="Are you sure you want to do this?\nReact with ✅ to confirm.",
                 color=self.bot.ok_color,
             ).set_footer(
-                text="⚠️ Elevating people to OWNER privliedge will allow them to use owner only commands."
+                text="⚠️ Elevating people to OWNER privilege will allow them to use owner only commands."
             )
         )
         await msg.add_reaction("\u2705")
@@ -101,22 +101,46 @@ class BotOwner(commands.Cog):
                 embed=discord.Embed(
                     description="You have two minutes.", color=self.bot.ok_color
                 ).add_field(
-                    name="Current Priviledged People",
+                    name="Current privileged People",
                     value="```\n" + "\n".join(map(str, filtered)) + "\n```",
                 ),
             )
             loop = asyncio.get_running_loop()
 
             def remove_owner():
+                if user.id not in self.bot.owner_ids:
+                    pass
                 self.bot.owner_ids.remove(user.id)
                 self.bot.logger.info(
-                    f"Removed {user}({user.id}) from the elevated owner priviledge set."
+                    f"Removed {user}({user.id}) from the elevated owner privilege set."
                 )
 
             loop.call_later(120, remove_owner)
         except asyncio.TimeoutError:
             await ctx.message.add_reaction("⏰")
             await ctx.send("`Confirmation Timed Out`")
+    
+    @commands.command()
+    async def delevate(self, ctx: commands.Context, user: discord.User = None):
+        """Delevate a users ownership privilege"""
+        if not ctx.author.id in self.bot.get_config("config", "config", "owner_ids"):
+            return await ctx.send(
+                embed=discord.Embed(
+                    description="You are not authorized to complete this action",
+                    color=self.bot.error_color
+                )
+            )
+        if not user:
+            user = ctx.author
+        if user.id not in self.bot.owner_ids:
+            return await ctx.send(
+                embed=discord.Embed(
+                    description=f"{user} is currently does not have ownership privilege",
+                    color=self.bot.error_color
+                )
+            )
+        self.bot.owner_ids.remove(user.id)
+        await ctx.message.add_reaction("\u2705")
 
     @commands.command(name="eval")
     @commands.is_owner()
@@ -270,10 +294,10 @@ class BotOwner(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def update(self, ctx: commands.Context):
-        """Update to the latest version of KurisuBot or whatever the latest commit of your fork is"""
+        """Update to the latest version of the master repo or whatever the latest commit of your fork is"""
         await ctx.send(
             embed=discord.Embed(
-                description="Attempting to update KurisuBot to latest version",
+                description=f"Attempting to update {self.bot.user.name} to the latest commit/version.",
                 color=self.bot.ok_color,
             )
         )
@@ -293,7 +317,7 @@ class BotOwner(commands.Cog):
         await self.bot.reload_all_extensions(ctx)
         await ctx.send(
             embed=discord.Embed(
-                description=f"Sucessfully updated KurisuBot Version `{self.bot.version}` to `{str(output, 'utf-8')}`",
+                description=f"Sucessfully updated {self.bot.user.name} Version `{self.bot.version}` to `{str(output, 'utf-8')}`",
                 color=self.bot.ok_color,
             )
         )
