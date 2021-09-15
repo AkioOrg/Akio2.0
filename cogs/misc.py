@@ -98,7 +98,7 @@ class Miscellaneous(commands.Cog):
         text_channels = 0
         voice_channels = 0
         owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
-
+        process = psutil.Process(os.getpid())
         for chan in self.bot.get_all_channels():
             if isinstance(chan, discord.TextChannel):
                 text_channels += 1
