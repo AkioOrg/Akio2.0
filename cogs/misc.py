@@ -94,7 +94,6 @@ class Miscellaneous(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def stats(self, ctx: commands.Context):
         """Some stats about me."""
-        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
         text_channels = 0
         voice_channels = 0
         owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
