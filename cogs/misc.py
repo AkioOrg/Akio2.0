@@ -96,7 +96,9 @@ class Miscellaneous(commands.Cog):
         """Some stats about me."""
         text_channels = 0
         voice_channels = 0
-        owners = [self.bot.get_user(x) for x in self.bot.get_config("config", "config", "owner_ids")]
+        owners = [
+            self.bot.get_user(o) for o in self.bot.get_config("config", "config", "owner_ids")
+        ]
         process = psutil.Process(os.getpid())
         for chan in self.bot.get_all_channels():
             if isinstance(chan, discord.TextChannel):
