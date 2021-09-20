@@ -79,11 +79,8 @@ class Music(commands.Cog):
         if player.is_playing:
             await ctx.send(f"Added: {tracks.tracks[0].title} to the queue.")
         else:
-            await ctx.send(
-                embed=discord.Embed(
-                    description=f"Now Playing: {tracks.tracks[0].title}",
-                    color=ctx.author.color or self.bot.ok_color,
-                )
+            await ctx.send(f"Now Playing: {tracks.tracks[0].title}")
+                
     @commands.command()
     async def disconnect(self, ctx: commands.Context):
         """Disconnect me from vc"""
@@ -93,7 +90,7 @@ class Music(commands.Cog):
             return await ctx.send("No Activate Players")
         await player.disconnect()
         await ctx.send("Disconnected")
-        
+
     @commands.command()
     async def queue(self, ctx):
         """Check the queue."""
