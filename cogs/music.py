@@ -77,7 +77,11 @@ class Music(commands.Cog):
         player.add(ctx.author, tracks.tracks[0])
         await player.play()
         if player.is_playing:
-            await ctx.send(f"Added: {tracks.tracks[0].title} to the queue.")
+            await ctx.send(
+                embed=discord.Embed(
+                    description=f"Added: {tracks.tracks[0].title} to the queue.",
+                    color=ctx.author.color or self.bot.ok_color,)
+                )
         else:
             await ctx.send(f"Now Playing: {tracks.tracks[0].title}")
                 
