@@ -56,7 +56,7 @@ class KurisuBot(commands.AutoShardedBot):
         self._session = None
         self.startup_time = discord.utils.utcnow()
         self.version = "3.2.2"
-        self.db = Database("sqlite:///kurisu/kurisu.db")
+        self.db = Database("sqlite:///kurisu/akio.db")
         self.executed_commands = 0
         self.prefixes = {}
 
@@ -87,7 +87,7 @@ class KurisuBot(commands.AutoShardedBot):
             await self.db.connect()
         except AssertionError:
             pass
-        self.logger.info("Connected to the database: `kurisu.db`")
+        self.logger.info("Connected to the database: `akio.db`")
 
     async def on_ready(self):
         if self.uptime is not None:
