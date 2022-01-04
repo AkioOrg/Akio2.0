@@ -3,10 +3,9 @@ import logging
 import traceback
 
 from discord.ext import commands
-import discord
-
-from utils.dbmanagers import PrefixManager, ErrorSuppressionHandler
+from utils.dbmanagers import ErrorSuppressionHandler, PrefixManager
 from utils.kurisu import KurisuBot
+import discord
 
 logging.getLogger("listeners")
 
@@ -20,7 +19,7 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(
-        self, ctx: commands.Context, error: commands.CommandError
+            self, ctx: commands.Context, error: commands.CommandError
     ):
         """Handle errors caused by commands."""
         # Skips errors that were already handled locally.
@@ -44,7 +43,7 @@ class Listeners(commands.Cog):
                 pass
 
         elif isinstance(
-            error, commands.TooManyArguments
+                error, commands.TooManyArguments
         ):  # Not really needed but yeah.
             await ctx.send(
                 embed=discord.Embed(
@@ -64,17 +63,17 @@ class Listeners(commands.Cog):
             )
 
         elif isinstance(
-            error,
-            (
-                commands.NotOwner,
-                commands.MissingPermissions,
-                commands.BotMissingAnyRole,
-                commands.MissingRole,
-                commands.BotMissingPermissions,
-                commands.CheckFailure,
-                commands.MissingRequiredArgument,
-                commands.BadArgument,
-            ),
+                error,
+                (
+                        commands.NotOwner,
+                        commands.MissingPermissions,
+                        commands.BotMissingAnyRole,
+                        commands.MissingRole,
+                        commands.BotMissingPermissions,
+                        commands.CheckFailure,
+                        commands.MissingRequiredArgument,
+                        commands.BadArgument,
+                ),
         ):
             await ctx.send(
                 embed=discord.Embed(
@@ -84,10 +83,10 @@ class Listeners(commands.Cog):
 
         elif isinstance(error, commands.CommandOnCooldown):
             if (
-                self.bot.get_config(
-                    "configoptions", "options", "reset_owner_cooldowns"
-                )
-                and ctx.author.id in self.bot.owner_ids
+                    self.bot.get_config(
+                        "configoptions", "options", "reset_owner_cooldowns"
+                    )
+                    and ctx.author.id in self.bot.owner_ids
             ):
                 ctx.command.reset_cooldown(ctx)
                 new_ctx = await self.bot.get_context(ctx.message)
@@ -103,7 +102,6 @@ class Listeners(commands.Cog):
             error_content = "".join(
                 traceback.format_exception(None, error, error.__traceback__)
             )
-            file = discord.File(io.BytesIO(error_content.encode("utf-8")), "error.py")
             await ctx.send(
                 embed=discord.Embed(
                     title="Oopsie!!!",
@@ -114,28 +112,27 @@ class Listeners(commands.Cog):
                     color=self.bot.error_color,
                 )
             )
-            if not await self.esh.fetch_all() or ctx.guild.id in (await self.esh.fetch_all())[0]:   
-                for owner in self.bot.get_config("config", "config", "owner_ids"):
+            suppressed_guilds = await self.esh.fetch_all()
+            if not suppressed_guilds or not ctx.guild.id in [
+                item[0] for item in suppressed_guilds
+            ]:
+                for owner in self.bot.get_config(
+                        "config", "config", "owner_ids"
+                ):
                     await self.bot.get_user(owner).send(
                         content=f"**You Idiot!!! A command threw an unhandled exception!!!**\n\n"
-                        f"**Command Name**: `{ctx.command.qualified_name}`\n"
-                        f"**Usage**: `{ctx.message.content}`\n"
-                        f"**Guild**: `{ctx.guild}({ctx.guild.id})`\n"
-                        f"**User**: `{ctx.author}({ctx.author.id})`\n"
-                        f"**Error Type**: `{error}`\n"
-                        "**Traceback**:",
-                        file=file
+                                f"**Command Name**: `{ctx.command.qualified_name}`\n"
+                                f"**Usage**: `{ctx.message.content}`\n"
+                                f"**Guild**: `{ctx.guild}({ctx.guild.id})`\n"
+                                f"**User**: `{ctx.author}({ctx.author.id})`\n"
+                                f"**Error Type**: `{error}`\n"
+                                "**Traceback**:",
+                        file=discord.File(
+                            io.BytesIO(error_content.encode("utf-8")),
+                            "error.py",
+                        ),
                     )
-                self.bot.logger.error(error_content)
-            else:
-                self.bot.logger.error(
-                    "Unhandled exception Caught.\n"
-                    + "".join(
-                        traceback.format_exception(
-                            None, error, error.__traceback__
-                        )
-                    )
-                )
+            self.bot.logger.error(error_content)
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx: commands.Context):
@@ -159,7 +156,7 @@ class Listeners(commands.Cog):
         if message.author.bot:
             return
         if not message.guild and self.bot.get_config(
-            "configoptions", "options", "forward_dms"
+                "configoptions", "options", "forward_dms"
         ):
             for owner in self.bot.get_config("config", "config", "owner_ids"):
                 try:

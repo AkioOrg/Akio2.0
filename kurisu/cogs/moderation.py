@@ -2,12 +2,11 @@ from typing import Optional, Union
 
 from discord.ext import commands
 from discord.utils import get
-import discord
-
 from utils.context import KurisuContext
 from utils.dbmanagers import WarningManager
 from utils.funcs import check_hierarchy
 from utils.kurisu import KurisuBot
+import discord
 
 
 class Moderation(commands.Cog):
@@ -23,11 +22,11 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     @commands.cooldown(1, 3, commands.BucketType.guild)
     async def ban(
-        self,
-        ctx: commands.Context,
-        member: Union[discord.Member, int],
-        *,
-        reason: str = None,
+            self,
+            ctx: KurisuContext,
+            member: Union[discord.Member, int],
+            *,
+            reason: str = None,
     ):
         """Ban users from the current server"""
 
@@ -86,11 +85,11 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     @commands.cooldown(1, 3, commands.BucketType.guild)
     async def kick(
-        self,
-        ctx: commands.Context,
-        member: discord.Member,
-        *,
-        reason: str = None,
+            self,
+            ctx: KurisuContext,
+            member: discord.Member,
+            *,
+            reason: str = None,
     ):
         """Kick members from the current server"""
         if await check_hierarchy(ctx, member):
@@ -112,7 +111,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions()
     @commands.cooldown(1, 3, commands.BucketType.guild)
-    async def unban(self, ctx: commands.Context, id: int):
+    async def unban(self, ctx: KurisuContext, id: int):
         """Unban someone from the current server"""
         if id is None:
             await ctx.send("Please pass in a ID for me to unban!")
@@ -140,11 +139,11 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.guild)
     async def mute(
-        self,
-        ctx: commands.Context,
-        member: discord.Member,
-        *,
-        reason: str = None,
+            self,
+            ctx: KurisuContext,
+            member: discord.Member,
+            *,
+            reason: str = None,
     ):
         """Mute a member"""
         if await check_hierarchy(ctx, member):
@@ -182,7 +181,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.guild)
-    async def unmute(self, ctx: commands.Context, member: discord.Member):
+    async def unmute(self, ctx: KurisuContext, member: discord.Member):
         """Unmute a member"""
         if not get(ctx.guild.roles, name="Kurisu-Mute") in member.roles:
             await ctx.send(
@@ -205,7 +204,7 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def purge(self, ctx: commands.Context, amount: int = None):
+    async def purge(self, ctx: KurisuContext, amount: int = None):
         """Purge x amount of messages"""
         if amount is None:
             await ctx.send(
@@ -227,10 +226,10 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def slowmode(
-        self,
-        ctx: commands.Context,
-        chan: Optional[discord.TextChannel] = None,
-        time: int = 0,
+            self,
+            ctx: KurisuContext,
+            chan: Optional[discord.TextChannel] = None,
+            time: int = 0,
     ):
         """Turn a slowmode delay on a specified channel in SECONDS"""
         if chan is None:
@@ -249,14 +248,14 @@ class Moderation(commands.Cog):
             )
 
     @commands.group(invoke_without_command=True)
-    async def warn(self, ctx: commands.Context):
+    async def warn(self, ctx: KurisuContext):
         """Warning related commands"""
         await ctx.send_help(ctx.command)
 
     @warn.command()
     @commands.has_permissions(kick_members=True)
     async def add(
-        self, ctx: KurisuContext, user: discord.Member, *, reason: str
+            self, ctx: KurisuContext, user: discord.Member, *, reason: str
     ):
         """Add warnings to a user"""
         if await check_hierarchy(ctx, user):
@@ -281,13 +280,13 @@ class Moderation(commands.Cog):
             embed=discord.Embed(
                 title=f"Warnings For {user}",
                 description="```\n"
-                + "\n".join(
+                            + "\n".join(
                     [
                         f"{n}. {i[0]} - {await self.bot.fetch_user(i[1])}"
                         for n, i in enumerate(warnings, 1)
                     ]
                 )
-                + "\n```",
+                            + "\n```",
                 color=self.bot.ok_color,
             )
         )
@@ -295,7 +294,7 @@ class Moderation(commands.Cog):
     @warn.command(aliases=["clear"])
     @commands.has_permissions(kick_members=True)
     async def remove(
-        self, ctx: commands.Context, warning: int, user: discord.Member
+            self, ctx: KurisuContext, warning: int, user: discord.Member
     ):
         """Remove A Specific Warning Off A User"""
         await self.wm.remove_warning(user.id, warning, ctx.guild.id)

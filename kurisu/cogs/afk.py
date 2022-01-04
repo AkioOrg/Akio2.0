@@ -1,10 +1,9 @@
 from discord.ext import commands
-import discord
-
 from utils.context import KurisuContext
 from utils.dbmanagers import AFKManager
 from utils.errors import UserNotFound
 from utils.kurisu import KurisuBot
+import discord
 
 
 class AFK(commands.Cog):
@@ -67,8 +66,8 @@ class AFK(commands.Cog):
                 title=f"Current AFK Status For {ctx.author.name}",
                 color=self.bot.ok_color,
             )
-            .add_field(name="Toggled", value=bool(afkdata[1]), inline=True)
-            .add_field(
+                .add_field(name="Toggled", value=bool(afkdata[1]), inline=True)
+                .add_field(
                 name="Message",
                 value="```\n" + str(afkdata[0]) + "\n```",
                 inline=True,

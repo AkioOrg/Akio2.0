@@ -4,9 +4,10 @@ import io
 
 from PIL import Image, ImageDraw
 from discord.ext import commands
-import discord
-
+from utils.context import KurisuContext
+from utils.dbmanagers import TodoManager
 from utils.kurisu import KurisuBot
+import discord
 
 
 class Utility(commands.Cog):
@@ -14,9 +15,46 @@ class Utility(commands.Cog):
 
     def __init__(self, bot: KurisuBot):
         self.bot = bot
+        self.tm = TodoManager(self.bot)
+
+    @commands.group(invoke_without_command=True)
+    @commands.cooldown(1, 3.5, commands.BucketType.user)
+    async def todo(self, ctx: KurisuContext):
+        """TODO management commands"""
+        await ctx.send_help(ctx.command)
+
+    @todo.command()
+    @commands.cooldown(1, 3.5, commands.BucketType.user)
+    async def add(self, ctx: KurisuContext, *, item: str):
+        """Add to your list of todos"""
+        await self.tm.add_todo(ctx.author.id, item)
+        await ctx.send(":ok_hand:")
+
+    @todo.command()
+    @commands.cooldown(1, 1.5, commands.BucketType.user)
+    async def list(self, ctx: KurisuContext):
+        """List all of your todo items"""
+        items = await self.tm.fetch_todos(ctx.author.id)
+        if not items:
+            return await ctx.send_error("No todos found for you.")
+
+        await ctx.send(
+            embed=discord.Embed(
+                title=f"Todo items for {ctx.author}",
+                description="\n".join([f"{n}. {v[0]}" for n, v in enumerate(items, 1)]),
+                color=self.bot.ok_color
+            )
+        )
+
+    @todo.command()
+    @commands.cooldown(1, 3.5, commands.BucketType.user)
+    async def remove(self, ctx: KurisuContext, item_number: int):
+        """Remove a todo item"""
+        await self.tm.remove_todo(ctx.author.id, item_number)
+        await ctx.send(":ok_hand:")
 
     @commands.command()
-    async def color(self, ctx: commands.Context, clr: str):
+    async def color(self, ctx: KurisuContext, clr: str):
         colors = {
             "aliceblue": ["#f0f8ff", "0xf0f8ff"],
             "antiquewhite": ["#faebd7", "0xfaebd7"],
@@ -171,8 +209,8 @@ class Utility(commands.Cog):
                 embed=discord.Embed(
                     title="Available Color List",
                     description="```apache\n"
-                    + ", ".join(sorted(map(str, colors)))
-                    + "\n```",
+                                + ", ".join(sorted(map(str, colors)))
+                                + "\n```",
                     color=self.bot.ok_color,
                 )
             )
@@ -209,7 +247,7 @@ class Utility(commands.Cog):
     @commands.command(aliases=["sinfo", "ginfo", "guildinfo"])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def serverinfo(
-        self, ctx: commands.Context, guild: discord.Guild = None
+            self, ctx: KurisuContext, guild: discord.Guild = None
     ):
         """Get information about a certain guild"""
         if guild is None:
@@ -270,9 +308,9 @@ class Utility(commands.Cog):
         embed.add_field(
             name="Channel Count",
             value=f"Text: **{len(guild.text_channels)}**\n"
-            f"Voice: **{len(guild.voice_channels)}**\n"
-            f"Categories: **{len(guild.categories)}**\n"
-            f"Total **{len(guild.text_channels) + len(guild.voice_channels) + len(guild.categories)}**",
+                  f"Voice: **{len(guild.voice_channels)}**\n"
+                  f"Categories: **{len(guild.categories)}**\n"
+                  f"Total **{len(guild.text_channels) + len(guild.voice_channels) + len(guild.categories)}**",
             inline=True,
         )
         embed.add_field(
@@ -296,7 +334,7 @@ class Utility(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def userinfo(
-        self, ctx: commands.context, user: discord.Member = None
+            self, ctx: KurisuContext, user: discord.Member = None
     ):
         """Returns info about a user"""
         if user is None:
@@ -345,24 +383,24 @@ class Utility(commands.Cog):
 
     @commands.command(aliases=["rinfo"])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def roleinfo(self, ctx: commands.Context, *, role: discord.Role):
+    async def roleinfo(self, ctx: KurisuContext, *, role: discord.Role):
         """Returns info about a role"""
         await ctx.send(
             embed=discord.Embed(
                 title=f"Role info for {role.name}", color=role.color
             )
-            .add_field(name="ID", value=role.id, inline=True)
-            .add_field(name="Color", value=role.color, inline=True)
-            .add_field(
+                .add_field(name="ID", value=role.id, inline=True)
+                .add_field(name="Color", value=role.color, inline=True)
+                .add_field(
                 name="Creation Time",
                 value=role.created_at.strftime("%c"),
                 inline=True,
             )
-            .add_field(name="Members", value=len(role.members), inline=True)
-            .add_field(name="Hoisted", value=role.hoist, inline=True)
-            .add_field(name="Mentionable", value=role.mentionable, inline=True)
-            .add_field(name="Position", value=role.position, inline=True)
-            .add_field(
+                .add_field(name="Members", value=len(role.members), inline=True)
+                .add_field(name="Hoisted", value=role.hoist, inline=True)
+                .add_field(name="Mentionable", value=role.mentionable, inline=True)
+                .add_field(name="Position", value=role.position, inline=True)
+                .add_field(
                 name="Permissions",
                 value=f"Click [Here](https://cogs.fixator10.ru/permissions-calculator/?v={role.permissions.value})",
                 inline=True,
@@ -371,24 +409,24 @@ class Utility(commands.Cog):
 
     @commands.command(aliases=["einfo", "emoteinfo"])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def emojiinfo(self, ctx: commands.Context, emoji: discord.Emoji):
+    async def emojiinfo(self, ctx: KurisuContext, emoji: discord.Emoji):
         """Returns information about a emoji/emote(Within the current guild)"""
         await ctx.send(
             embed=discord.Embed(
                 title="Emoji Information", color=self.bot.ok_color
             )
-            .add_field(name="ID", value=emoji.id, inline=False)
-            .add_field(name="Animated", value=emoji.animated, inline=False)
-            .add_field(name="Link", value=emoji.url, inline=False)
-            .set_image(url=emoji.url)
+                .add_field(name="ID", value=emoji.id, inline=False)
+                .add_field(name="Animated", value=emoji.animated, inline=False)
+                .add_field(name="Link", value=emoji.url, inline=False)
+                .set_image(url=emoji.url)
         )
 
     @commands.command(aliases=["se", "bigmoji", "jumbo"])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def bigemoji(
-        self,
-        ctx: commands.Context,
-        emoji: Union[discord.Emoji, discord.PartialEmoji, str],
+            self,
+            ctx: KurisuContext,
+            emoji: Union[discord.Emoji, discord.PartialEmoji, str],
     ):
         """
         Get a emoji in big size lol
@@ -425,7 +463,7 @@ class Utility(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
     async def avatar(
-        self, ctx: commands.Context, user: Optional[discord.Member]
+            self, ctx: KurisuContext, user: Optional[discord.Member]
     ):
         """Check your avatars."""
         await ctx.channel.trigger_typing()
@@ -438,9 +476,9 @@ class Utility(commands.Cog):
         e.add_field(
             name="File Formations",
             value=f"[jpg]({av.with_format('jpg')}), "
-            f"[png]({av.with_format('png')}), "
-            f"[webp]({av.with_format('webp')}){',' if av.is_animated() else ''} "
-            f"{f'[gif]({av})' if av.is_animated() else ''}",
+                  f"[png]({av.with_format('png')}), "
+                  f"[webp]({av.with_format('webp')}){',' if av.is_animated() else ''} "
+                  f"{f'[gif]({av})' if av.is_animated() else ''}",
         )
         e.add_field(
             name="Animated", value="\u2705" if av.is_animated() else ":x:"
@@ -452,7 +490,7 @@ class Utility(commands.Cog):
     @commands.command(aliases=["setnsfw"])
     @commands.has_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def nsfw(self, ctx: commands.Context):
+    async def nsfw(self, ctx: KurisuContext):
         """Toggle nsfw flag on the current channel"""
         if not ctx.channel.is_nsfw():
             await ctx.channel.edit(nsfw=True)
@@ -468,7 +506,7 @@ class Utility(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_guild=True)
     @commands.bot_has_permissions(manage_guild=True)
-    async def setafktimeout(self, ctx: commands.Context, timeout: str):
+    async def setafktimeout(self, ctx: KurisuContext, timeout: str):
         """Set the afk timeout for this server. Run [p]setafktimeout timelist for a list for all available times"""
         timeouts = {
             "1m": ["60", "1 Minute"],
@@ -498,7 +536,7 @@ class Utility(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.bot_has_permissions(manage_guild=True)
     async def setafkchannel(
-        self, ctx: commands.Context, channel: discord.VoiceChannel = None
+            self, ctx: KurisuContext, channel: discord.VoiceChannel = None
     ):
         """Set the channel to where people go when they hit the AFK timeout. Pass in None for no Inactive Channel"""
         if channel is None:
@@ -522,7 +560,7 @@ class Utility(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def createrole(self, ctx: commands.Context, *, name: str):
+    async def createrole(self, ctx: KurisuContext, *, name: str):
         """Create a role"""
         await ctx.guild.create_role(name=name)
         await ctx.send(
@@ -536,7 +574,7 @@ class Utility(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def deleterole(self, ctx, *, role: discord.Role):
+    async def deleterole(self, ctx: KurisuContext, *, role: discord.Role):
         """Delete a role"""
         await role.delete()
         await ctx.send(

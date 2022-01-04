@@ -125,7 +125,7 @@ class KurisuBot(commands.AutoShardedBot):
             msg
         )
         time_difference = (
-            (self.startup_time - discord.utils.utcnow()) * 1000
+                (self.startup_time - discord.utils.utcnow()) * 1000
         ).total_seconds()
         formatted_time_difference = str(time_difference).replace("-", "")
         self.logger.info(
@@ -148,7 +148,7 @@ class KurisuBot(commands.AutoShardedBot):
         for g in self.guilds:
             if g.voice_client:
                 await g.voice_client.destroy()
-        self.logger.info("Destroyed all activate LL players")
+        self.logger.info("Destroyed all active LL players")
         if self._session:
             self._session.close()
             self.logger.info("Terminated HTTP sessions.")
@@ -157,13 +157,12 @@ class KurisuBot(commands.AutoShardedBot):
         self.logger.info("Proceeding to normal shutdown")
         await super().close()
 
-
     async def full_exit(self):
         """Completely kills the process and closes all connections. However, it will continue to restart if being ran with PM2"""
         for g in self.guilds:
             if g.voice_client:
                 await g.voice_client.destroy()
-        self.logger.info("Destroyed all activate LL players")
+        self.logger.info("Destroyed all active LL players")
         if self._session:
             self._session.close()
             self.logger.info("Terminated HTTP sessions.")

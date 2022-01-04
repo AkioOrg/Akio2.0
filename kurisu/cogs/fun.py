@@ -1,11 +1,12 @@
 from io import BytesIO
 from random import choice, randint
 
-from discord.ext import commands
+from discord.ext import commands, vbu
+from utils.context import KurisuContext
+from utils.kurisu import KurisuBot
+from utils.helpers import get_ud_results
 import aiohttp
 import discord
-
-from utils.kurisu import KurisuBot
 
 
 class Fun(commands.Cog):
@@ -14,9 +15,10 @@ class Fun(commands.Cog):
     def __init__(self, bot: KurisuBot):
         self.bot = bot
 
+
     @commands.command(name="8ball")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _8ball(self, ctx: commands.Context, *, question):
+    async def _8ball(self, ctx: KurisuContext, *, question):
         """Ask the mystical 8 ball anything."""
         answers = [
             "As I see it, yes.",
@@ -49,10 +51,11 @@ class Fun(commands.Cog):
             ).set_footer(text=f"Question asked by {ctx.author}")
         )
 
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def compliment(
-        self, ctx: commands.Context, member: discord.Member = None
+            self, ctx: KurisuContext, member: discord.Member = None
     ):
         """Compliment someone or yourself"""
         if member is None:
@@ -97,6 +100,7 @@ class Fun(commands.Cog):
             ).set_footer(text=f"Compliment from {ctx.author}")
         )
 
+
     @commands.command(aliases=["rng"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def randomnumber(self, ctx, int1: int, int2: int):
@@ -117,9 +121,10 @@ class Fun(commands.Cog):
                 )
             )
 
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def owoify(self, ctx: commands.Context, *, txt):
+    async def owoify(self, ctx: KurisuContext, *, txt):
         """Owoify some text"""
         if len(txt) > 200:
             await ctx.send(
@@ -130,7 +135,7 @@ class Fun(commands.Cog):
             )
         else:
             async with self.bot.session.get(
-                f"https://nekos.life/api/v2/owoify?text={txt}"
+                    f"https://nekos.life/api/v2/owoify?text={txt}"
             ) as resp:
                 await ctx.send(
                     embed=discord.Embed(
@@ -140,19 +145,20 @@ class Fun(commands.Cog):
                     )
                 )
 
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.bot_has_permissions(embed_links=True, attach_files=True)
     @commands.max_concurrency(1, commands.BucketType.user)
-    async def osu(self, ctx: commands.Context, *, user):
+    async def osu(self, ctx: KurisuContext, *, user):
         """Get osu information about someone."""
         try:
             async with self.bot.session.get(
-                "https://api.martinebot.com/v1/imagesgen/osuprofile",
-                params={
-                    "player_username": user,
-                },
-                raise_for_status=True,
+                    "https://api.martinebot.com/v1/imagesgen/osuprofile",
+                    params={
+                        "player_username": user,
+                    },
+                    raise_for_status=True,
             ) as r:
                 pic = BytesIO(await r.read())
         except aiohttp.ClientResponseError as e:
@@ -176,12 +182,13 @@ class Fun(commands.Cog):
         if isinstance(pic, BytesIO):
             pic.close()
 
+
     @commands.command(aliases=["aq"])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def animequote(self, ctx: commands.Context):
+    async def animequote(self, ctx: KurisuContext):
         """Recieve an anime quote from the AnimeChan API"""
         async with self.bot.session.get(
-            "https://animechan.vercel.app/api/random"
+                "https://animechan.vercel.app/api/random"
         ) as resp:
             if resp.status == 200:
                 quote = (await resp.json())["quote"]
@@ -201,18 +208,20 @@ class Fun(commands.Cog):
                     )
                 )
 
+
     @commands.group(invoke_without_command=True)
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def img(self, ctx: commands.Context):
+    async def img(self, ctx: KurisuContext):
         """Return sfw images from the waifu.im api"""
         await ctx.send_help(ctx.command)
 
+
     @img.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def maid(self, ctx: commands.Context):
+    async def maid(self, ctx: KurisuContext):
         """maids go brrr"""
         async with self.bot.session.get(
-            "https://api.waifu.im/sfw/maid"
+                "https://api.waifu.im/sfw/maid"
         ) as resp:
             await ctx.send(
                 embed=discord.Embed(color=self.bot.ok_color).set_image(
@@ -220,18 +229,45 @@ class Fun(commands.Cog):
                 )
             )
 
+
     @img.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def waifu(self, ctx: commands.Context):
+    async def waifu(self, ctx: KurisuContext):
         """waifu"""
         async with self.bot.session.get(
-            "https://api.waifu.im/sfw/waifu"
+                "https://api.waifu.im/sfw/waifu"
         ) as resp:
             await ctx.send(
                 embed=discord.Embed(color=self.bot.ok_color).set_image(
                     url=(await resp.json())["images"][0]["url"]
                 )
             )
+
+
+    @commands.command()
+    @commands.cooldown(1, 4.5, commands.BucketType.user)
+    async def ud(self, ctx: KurisuContext, *, term: str):
+        """Query the Urban Dictionary API with a term"""
+        results = await get_ud_results(term)
+        embeds: list[discord.Embed] = []
+
+        for i in results:
+            embeds.append(
+                discord.Embed(
+                    title=f"Definition for {term}",
+                    description=f"Definition: {i['definition']}",
+                    color=self.bot.ok_color
+                ).set_footer(
+                    text=f"👍: {i['thumbs_up']}"
+                ).add_field(
+                    name="Author",
+                    value=i["author"] or "No Author "
+                )
+            )
+
+        await vbu.Paginator(data=embeds, per_page=1).start(ctx)
+
+
 
 
 def setup(bot):
