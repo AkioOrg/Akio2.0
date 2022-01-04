@@ -3,10 +3,10 @@ import logging
 import os
 
 from discord.ext import commands
-import discord
-
-from utils.classes import KurisuBot, PrefixManager
+from utils.dbmanagers import PrefixManager
+from utils.kurisu import KurisuBot
 from utils.schema import schema
+import discord
 
 logging.getLogger("main")
 
@@ -14,26 +14,22 @@ logging.getLogger("main")
 def get_prefix(bot: KurisuBot, msg: discord.Message):
     if not msg.guild or not str(msg.guild.id) in bot.prefixes:
         return commands.when_mentioned_or(
-            bot.get_config("config", "config", "prefix"))(bot, msg)
-    return commands.when_mentioned_or(bot.prefixes.get(str(msg.guild.id)))(bot,
-                                                                           msg)
+            bot.get_config("config", "config", "prefix")
+        )(bot, msg)
+    return commands.when_mentioned_or(bot.prefixes.get(str(msg.guild.id)))(
+        bot, msg
+    )
 
 
 bot = KurisuBot(command_prefix=get_prefix)
-
-if discord.__version__ != "2.0.0a":
-    bot.logger.critical(
-        f"DISCORD.PY VERSION REQUIREMENT NOT MET. EXPECTED 2.0.0a, GOT {discord.__version__}."
-    )
-    bot.logger.critical("EXITING!")
-    exit(code=26)
 
 pm = PrefixManager(bot=bot)
 
 
 async def DatabaseInit(Schema: str):
     bot.logger.info("Initializing Database...")
-    await bot.db.execute(query=Schema)
+    for i in Schema.split(";;"):
+        await bot.db.execute(i)
     bot.logger.info("Schema Execution Complete.")
     bot.logger.info("Attempting To Append Prefixes To On-Memory Cache.")
     try:

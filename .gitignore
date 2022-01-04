@@ -5,7 +5,11 @@ __pycache__
 .idea
 venv
 /cogs/testing.py
+<<<<<<< HEAD
 akio.db
+=======
+*.db
+>>>>>>> 341df2d42fdaffaf8e877355789432b4bdd741be
 
 # personal
 setup.sh

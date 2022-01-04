@@ -47,8 +47,13 @@ class LoggingHandler(logging.StreamHandler):
         # noinspection PyStatementEffect
         level = record.levelno  # noqa F841
         level_name = record.levelname
+<<<<<<< HEAD:utils/log.py
         if name == "akio":
             split = record.msg.split(";")
+=======
+        if name == "kurisu":
+            split = str(record.msg).split(";")
+>>>>>>> 341df2d42fdaffaf8e877355789432b4bdd741be:kurisu/utils/log.py
             if len(split) == 1:
                 sub = None
                 message = split[0]
@@ -80,7 +85,9 @@ class LoggingHandler(logging.StreamHandler):
                 first = False
 
             if record.exc_info:
-                exception: Tuple[type, BaseException, TracebackType] = record.exc_info
+                exception: Tuple[
+                    type, BaseException, TracebackType
+                ] = record.exc_info
                 lines = traceback.format_exception(*exception)
                 for line in lines:
                     for msg in line.splitlines():

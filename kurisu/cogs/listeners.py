@@ -1,10 +1,11 @@
+import io
 import logging
 import traceback
 
 from discord.ext import commands
+from utils.dbmanagers import ErrorSuppressionHandler, PrefixManager
+from utils.kurisu import KurisuBot
 import discord
-
-from utils.classes import KurisuBot, PrefixManager
 
 logging.getLogger("listeners")
 
@@ -13,10 +14,13 @@ class Listeners(commands.Cog):
     def __init__(self, bot: KurisuBot):
         self.bot = bot
         self.timeout = 60
-        self.prefix_manager = PrefixManager(bot=self.bot)
+        self.prefix_manager = PrefixManager(self.bot)
+        self.esh = ErrorSuppressionHandler(self.bot)
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+    async def on_command_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
         """Handle errors caused by commands."""
         # Skips errors that were already handled locally.
         if getattr(ctx, "handled", False):
@@ -38,7 +42,9 @@ class Listeners(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        elif isinstance(error, commands.TooManyArguments):  # Not really needed but yeah.
+        elif isinstance(
+            error, commands.TooManyArguments
+        ):  # Not really needed but yeah.
             await ctx.send(
                 embed=discord.Embed(
                     description="You passed in a couple unneeded arguments. Please get rid of them and try again",
@@ -69,48 +75,64 @@ class Listeners(commands.Cog):
                 commands.BadArgument,
             ),
         ):
-            await ctx.send(embed=discord.Embed(description=str(error), color=self.bot.error_color))
+            await ctx.send(
+                embed=discord.Embed(
+                    description=str(error), color=self.bot.error_color
+                )
+            )
 
         elif isinstance(error, commands.CommandOnCooldown):
             if (
-                self.bot.get_config("configoptions", "options", "reset_owner_cooldowns")
+                self.bot.get_config(
+                    "configoptions", "options", "reset_owner_cooldowns"
+                )
                 and ctx.author.id in self.bot.owner_ids
             ):
                 ctx.command.reset_cooldown(ctx)
                 new_ctx = await self.bot.get_context(ctx.message)
                 await self.bot.invoke(new_ctx)
             else:
-                await ctx.send(embed=discord.Embed(description=error, color=self.bot.error_color))
+                await ctx.send(
+                    embed=discord.Embed(
+                        description=error, color=self.bot.error_color
+                    )
+                )
 
         elif isinstance(error, commands.CommandInvokeError):
+            error_content = "".join(
+                traceback.format_exception(None, error, error.__traceback__)
+            )
             await ctx.send(
                 embed=discord.Embed(
-                    title="Oops!",
-                    description=f"It looks like my owner may have messed up some code for this command.\n```py\n{error}\n```",
+                    title="Oopsie!!!",
+                    description="Looks like this command errored out. "
+                    "I've contacted this bots ownership about thie issue. "
+                    "Hopefully soon the issue will be fixed!!!"
+                    f"\n\nError: `{error}`",
                     color=self.bot.error_color,
-                ).set_footer(
-                    icon_url=ctx.author.avatar.url, text="This incident was reported to my master."
                 )
             )
-            for o in self.bot.get_config("config", "config", "owner_ids"):
-                try:
-                    owner = await self.bot.fetch_user(o)
-                    await owner.send(
-                        embed=discord.Embed(
-                            title="You Baka!",
-                            description=f"`{ctx.command}` errored out in `{ctx.guild}({ctx.guild.id})`\n```py\n{error}\n```",
-                            color=self.bot.error_color,
-                        )
+            suppressed_guilds = await self.esh.fetch_all()
+            if not suppressed_guilds or not ctx.guild.id in [
+                item[0] for item in suppressed_guilds
+            ]:
+                for owner in self.bot.get_config(
+                    "config", "config", "owner_ids"
+                ):
+                    await self.bot.get_user(owner).send(
+                        content=f"**You Idiot!!! A command threw an unhandled exception!!!**\n\n"
+                        f"**Command Name**: `{ctx.command.qualified_name}`\n"
+                        f"**Usage**: `{ctx.message.content}`\n"
+                        f"**Guild**: `{ctx.guild}({ctx.guild.id})`\n"
+                        f"**User**: `{ctx.author}({ctx.author.id})`\n"
+                        f"**Error Type**: `{error}`\n"
+                        "**Traceback**:",
+                        file=discord.File(
+                            io.BytesIO(error_content.encode("utf-8")),
+                            "error.py",
+                        ),
                     )
-                except Exception as e:
-                    self.bot.logger.error(e)
-
-            self.bot.logger.error(
-                f"**{ctx.command.qualified_name} failed to execute**", exc_info=error.original
-            )
-        else:
-            self.bot.logger.error("Unhandled Exception Found")
-            traceback.print_exception(type(error), error, error.__traceback__)
+            self.bot.logger.error(error_content)
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx: commands.Context):
@@ -133,7 +155,9 @@ class Listeners(commands.Cog):
             return
         if message.author.bot:
             return
-        if not message.guild and self.bot.get_config("configoptions", "options", "forward_dms"):
+        if not message.guild and self.bot.get_config(
+            "configoptions", "options", "forward_dms"
+        ):
             for owner in self.bot.get_config("config", "config", "owner_ids"):
                 try:
                     await self.bot.get_user(owner).send(
@@ -147,7 +171,9 @@ class Listeners(commands.Cog):
                         )
                     )
                 except discord.HTTPException as e:
-                    self.bot.logger.info(f"Failed to forward dms to the owner due to: {e}")
+                    self.bot.logger.info(
+                        f"Failed to forward dms to the owner due to: {e}"
+                    )
 
     async def edit_process_commands(self, message: discord.Message):
         """Same as Airi's method (Airi.process_commands), but don't dispatch message_without_command."""

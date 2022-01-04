@@ -2,9 +2,9 @@ from io import BytesIO
 import asyncio
 
 from discord.ext import commands
+from utils.kurisu import KurisuBot
+from utils.context import KurisuContext
 import discord
-
-from utils.classes import KurisuBot
 
 snipe = {
     "id": None,
@@ -19,7 +19,7 @@ edit_snipe = {"author": None, "content": None, "guild": None, "channel": None}
 
 
 class Snipe(commands.Cog):
-    """Some snipe related commands xd"""
+    """Commands with helping snipe edited or deleted messages"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -77,7 +77,7 @@ class Snipe(commands.Cog):
 
     @commands.command(aliases=["imagesnipe"])
     @commands.cooldown(1, 10, commands.BucketType.member)
-    async def snipe(self, ctx: commands.Context):
+    async def snipe(self, ctx: KurisuContext):
         """Snipe the last deleted message, works with images"""
         global snipe
 
@@ -92,7 +92,9 @@ class Snipe(commands.Cog):
             )
             return await ctx.send(embed=emb, delete_after=5)
 
-        embed = discord.Embed(description=str(snipe["content"]), colour=0xFFCDCD)
+        embed = discord.Embed(
+            description=str(snipe["content"]), colour=0xFFCDCD
+        )
         embed.set_author(
             name="{0.name}#{0.discriminator}".format(snipe["author"]),
             icon_url=snipe["author"].avatar.url,
@@ -105,7 +107,9 @@ class Snipe(commands.Cog):
             async with self.bot.session.get(snipe["attachment"]) as r:
                 file = BytesIO(await r.read())
             embed.set_image(url="attachment://snipe.jpg")
-            await ctx.send(embed=embed, file=discord.File(file, filename="snipe.jpg"))
+            await ctx.send(
+                embed=embed, file=discord.File(file, filename="snipe.jpg")
+            )
             snipe["attachment"] = None
         else:
             await ctx.send(embed=embed)
@@ -113,7 +117,7 @@ class Snipe(commands.Cog):
 
     @commands.command(aliases=["esnipe"])
     @commands.cooldown(1, 10, commands.BucketType.member)
-    async def editsnipe(self, ctx: commands.Context):
+    async def editsnipe(self, ctx: KurisuContext):
         """Sneaky Sneaky snipe the edited message"""
 
         if (
@@ -127,7 +131,9 @@ class Snipe(commands.Cog):
             )
             return await ctx.send(embed=emb, delete_after=5)
 
-        embed = discord.Embed(description=str(edit_snipe["content"]), colour=0xFFCDCD)
+        embed = discord.Embed(
+            description=str(edit_snipe["content"]), colour=0xFFCDCD
+        )
         embed.set_footer(
             text=f"sniped by {ctx.author.name}#{ctx.author.discriminator}",
             icon_url=ctx.author.avatar.url,

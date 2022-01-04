@@ -1,23 +1,22 @@
 from io import BytesIO
 from random import choice, randint
-import json
 
 from discord.ext import commands
+from utils.kurisu import KurisuBot
+from utils.context import KurisuContext
 import aiohttp
 import discord
 
-from utils.classes import KurisuBot
-
 
 class Fun(commands.Cog):
-    """Fun related commands"""
+    """Many different fun styled commands for your enterainment."""
 
     def __init__(self, bot: KurisuBot):
         self.bot = bot
 
     @commands.command(name="8ball")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _8ball(self, ctx: commands.Context, *, question):
+    async def _8ball(self, ctx: KurisuContext, *, question):
         """Ask the mystical 8 ball anything."""
         answers = [
             "As I see it, yes.",
@@ -52,7 +51,9 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def compliment(self, ctx: commands.Context, member: discord.Member = None):
+    async def compliment(
+        self, ctx: KurisuContext, member: discord.Member = None
+    ):
         """Compliment someone or yourself"""
         if member is None:
             member = ctx.author
@@ -91,7 +92,8 @@ class Fun(commands.Cog):
         ]
         await ctx.send(
             embed=discord.Embed(
-                description=f"{member.mention} {choice(compliments)}", color=self.bot.ok_color
+                description=f"{member.mention} {choice(compliments)}",
+                color=self.bot.ok_color,
             ).set_footer(text=f"Compliment from {ctx.author}")
         )
 
@@ -117,27 +119,23 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def owoify(self, ctx: commands.Context, *, txt):
+    async def owoify(self, ctx: KurisuContext, *, txt):
         """Owoify some text"""
         if len(txt) > 200:
             await ctx.send(
                 embed=discord.Embed(
-                    description="Text cannot be over 200", color=self.bot.error_color
+                    description="Text cannot be over 200",
+                    color=self.bot.error_color,
                 )
             )
         else:
             async with self.bot.session.get(
                 f"https://nekos.life/api/v2/owoify?text={txt}"
             ) as resp:
-                tup = (await resp.json())["owo"]
-                formatted_tuple = (
-                    str(tup).replace("(", "").replace(")", "").replace("'", "").replace(",", "")
-                )
-
                 await ctx.send(
                     embed=discord.Embed(
                         title="OwO here you go.",
-                        description=formatted_tuple,
+                        description=" ".join((await resp.json())["owo"]),
                         color=self.bot.ok_color,
                     )
                 )
@@ -146,7 +144,7 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.bot_has_permissions(embed_links=True, attach_files=True)
     @commands.max_concurrency(1, commands.BucketType.user)
-    async def osu(self, ctx: commands.Context, *, user):
+    async def osu(self, ctx: KurisuContext, *, user):
         """Get osu information about someone."""
         try:
             async with self.bot.session.get(
@@ -163,7 +161,9 @@ class Fun(commands.Cog):
                 color=self.bot.ok_color,
             )
             return await ctx.send(embed=emb)
-        e = discord.Embed(title=f"Here's the osu profile for {user}", color=self.bot.ok_color)
+        e = discord.Embed(
+            title=f"Here's the osu profile for {user}", color=self.bot.ok_color
+        )
         if isinstance(pic, BytesIO):
             e.set_image(url="attachment://osu.png")
         elif isinstance(pic, str):
@@ -178,16 +178,19 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=["aq"])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def animequote(self, ctx: commands.Context):
+    async def animequote(self, ctx: KurisuContext):
         """Recieve an anime quote from the AnimeChan API"""
-        async with self.bot.session.get("https://animechan.vercel.app/api/random") as resp:
+        async with self.bot.session.get(
+            "https://animechan.vercel.app/api/random"
+        ) as resp:
             if resp.status == 200:
                 quote = (await resp.json())["quote"]
                 char = (await resp.json())["character"]
                 anime = (await resp.json())["anime"]
                 await ctx.send(
                     embed=discord.Embed(
-                        description=f"{quote}\n~{char}", color=self.bot.ok_color
+                        description=f"{quote}\n~{char}",
+                        color=self.bot.ok_color,
                     ).set_footer(text=f"Anime: {anime}")
                 )
             else:
@@ -197,6 +200,38 @@ class Fun(commands.Cog):
                         color=self.bot.error_color,
                     )
                 )
+
+    @commands.group(invoke_without_command=True)
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def img(self, ctx: KurisuContext):
+        """Return sfw images from the waifu.im api"""
+        await ctx.send_help(ctx.command)
+
+    @img.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def maid(self, ctx: KurisuContext):
+        """maids go brrr"""
+        async with self.bot.session.get(
+            "https://api.waifu.im/sfw/maid"
+        ) as resp:
+            await ctx.send(
+                embed=discord.Embed(color=self.bot.ok_color).set_image(
+                    url=(await resp.json())["images"][0]["url"]
+                )
+            )
+
+    @img.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def waifu(self, ctx: KurisuContext):
+        """waifu"""
+        async with self.bot.session.get(
+            "https://api.waifu.im/sfw/waifu"
+        ) as resp:
+            await ctx.send(
+                embed=discord.Embed(color=self.bot.ok_color).set_image(
+                    url=(await resp.json())["images"][0]["url"]
+                )
+            )
 
 
 def setup(bot):
