@@ -16,7 +16,7 @@ class KurisuBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         for logger in [
-            "kurisu",
+            "akio",
             "discord.client",
             "discord.gateway",
             "discord.http",
@@ -25,10 +25,10 @@ class KurisuBot(commands.AutoShardedBot):
             "main",
         ]:
             logging.getLogger(logger).setLevel(
-                logging.DEBUG if logger == "kurisu" else logging.INFO
+                logging.DEBUG if logger == "akio" else logging.INFO
             )
             logging.getLogger(logger).addHandler(LoggingHandler())
-        self.logger = logging.getLogger("kurisu")
+        self.logger = logging.getLogger("akio")
         super().__init__(
             intents=discord.Intents.all(),
             allowed_mentions=discord.AllowedMentions(

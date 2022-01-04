@@ -31,7 +31,7 @@ styles = {
     "CRITICAL": Style.BRIGHT,
 }
 names = {
-    "kurisu": Fore.BLUE,
+    "akio": Fore.BLUE,
     "discord.client": Fore.GREEN,
     "discord.gateway": Fore.MAGENTA,
     "discord.ext.commands.core": Fore.YELLOW,
@@ -47,7 +47,7 @@ class LoggingHandler(logging.StreamHandler):
         # noinspection PyStatementEffect
         level = record.levelno  # noqa F841
         level_name = record.levelname
-        if name == "kurisu":
+        if name == "akio":
             split = str(record.msg).split(";")
             if len(split) == 1:
                 sub = None

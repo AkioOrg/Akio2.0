@@ -35,7 +35,7 @@ class ImSorry(commands.Cog):
                 description="\n".join([f"[{res.title}]({res.url})\n{res.description}\n\n" for res in results[:5]]),
                 color=self.bot.ok_color
             ).set_footer(
-                text=f"Requested by {ctx.author}" if ctx.author.id != 595493378062548994 else "ily <3",
+                text=f"Requested by {ctx.author}",
                 icon_url=ctx.author.display_avatar
             ).set_author(
                 name=str(ctx.author),
