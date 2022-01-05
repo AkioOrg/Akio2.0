@@ -6,7 +6,7 @@ from utils.kurisu import KurisuBot
 from utils.context import KurisuContext
 from discord.ext import commands
 
-class ImSorry(commands.Cog):
+class Searches(commands.Cog):
     def __init__(self, bot: KurisuBot):
         self.bot = bot
         self.api_key = self.bot.get_config("config", "search", "google_api_key")
@@ -45,4 +45,4 @@ class ImSorry(commands.Cog):
 
 
 def setup(bot: KurisuBot):
-    bot.add_cog(ImSorry(bot))
+    bot.add_cog(Searches(bot))
